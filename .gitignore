@@ -47,3 +47,5 @@ iOSInjectionProject/
 # Workspace data
 
 project.xcworkspace/
+
+.DS_Store

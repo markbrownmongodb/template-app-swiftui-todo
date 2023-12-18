@@ -4,6 +4,7 @@ import RealmSwift
 struct ContentView: View {
     @ObservedObject var app: RealmSwift.App
     @EnvironmentObject var errorHandler: ErrorHandler
+    @State private var isFirstLogin: Bool = true
 
     var body: some View {
         if let user = app.currentUser {
@@ -21,11 +22,12 @@ struct ContentView: View {
                 }
             })
             OpenRealmView(user: user)
-                // Store configuration in the environment to be opened in next view
+            // Store configuration in the environment to be opened in next view
                 .environment(\.realmConfiguration, config)
         } else {
             // If there is no user logged in, show the login view.
-            LoginView()
+            LoginView(isFirstLogin: isFirstLogin)
+                .task { isFirstLogin = false }
         }
     }
 }

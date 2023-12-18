@@ -5,6 +5,11 @@ import RealmSwift
 struct LoginView: View {
     @State var email = ""
     @State var password = ""
+    
+    let autoEmail: String = UserDefaults.standard.string(forKey: "username") ?? ""
+    let autoPassword: String = UserDefaults.standard.string(forKey: "password") ?? ""
+    let isAppetize: Bool = UserDefaults.standard.bool(forKey: "isAppetize")
+    let isFirstLogin: Bool
 
     @State private var isLoggingIn = false
     @EnvironmentObject var errorHandler: ErrorHandler
@@ -14,46 +19,60 @@ struct LoginView: View {
             if isLoggingIn {
                 ProgressView()
             }
-            VStack {
-                Text("My Sync App")
-                    .font(.title)
-                TextField("Email", text: $email)
-                    .textInputAutocapitalization(.never)
-                    .textFieldStyle(.roundedBorder)
-                    .autocorrectionDisabled(true)
-                SecureField("Password", text: $password)
-                    .textFieldStyle(.roundedBorder)
-                Button("Log In") {
-                    // Button pressed, so log in
-                    isLoggingIn = true
-                    Task.init {
-                        await login(email: email, password: password)
-                        isLoggingIn = false
-                    }
+            else if isAppetize && isFirstLogin && !autoEmail.isEmpty && !autoPassword.isEmpty {
+                VStack {
+                    Text("Auto Login U:[\(autoEmail)] P:[\(autoPassword)]")
+                        .task {
+                            isLoggingIn = true
+                            Task.init {
+                                await login(email: autoEmail, password: autoPassword)
+                                isLoggingIn = false
+                            }
+                        }
                 }
-                .disabled(isLoggingIn)
-                .frame(width: 150, height: 50)
-                .background(Color(red: 0.25, green: 0.59, blue: 0.22))
-                .foregroundColor(.white)
-                .clipShape(Capsule())
-                Button("Create Account") {
-                    // Button pressed, so create account and then log in
-                    isLoggingIn = true
-                    Task {
-                        await signUp(email: email, password: password)
-                        isLoggingIn = false
+            }
+            else {
+                VStack {
+                    Text("My Sync App")
+                        .font(.title)
+                    TextField("Email", text: $email)
+                        .textInputAutocapitalization(.never)
+                        .textFieldStyle(.roundedBorder)
+                        .autocorrectionDisabled(true)
+                    SecureField("Password", text: $password)
+                        .textFieldStyle(.roundedBorder)
+                    Button("Log In") {
+                        // Button pressed, so log in
+                        isLoggingIn = true
+                        Task.init {
+                            await login(email: email, password: password)
+                            isLoggingIn = false
+                        }
                     }
-                }
-                .disabled(isLoggingIn)
-                .frame(width: 150, height: 50)
-                .background(Color(red: 0.25, green: 0.59, blue: 0.22))
-                .foregroundColor(.white)
-                .clipShape(Capsule())
-                Text("Please log in or register with a Device Sync user account. This is separate from your Atlas Cloud login")
-                    .font(.footnote)
-                    .padding(20)
-                    .multilineTextAlignment(.center)
-            }.padding(20)
+                    .disabled(isLoggingIn)
+                    .frame(width: 150, height: 50)
+                    .background(Color(red: 0.25, green: 0.59, blue: 0.22))
+                    .foregroundColor(.white)
+                    .clipShape(Capsule())
+                    Button("Create Account") {
+                        // Button pressed, so create account and then log in
+                        isLoggingIn = true
+                        Task {
+                            await signUp(email: email, password: password)
+                            isLoggingIn = false
+                        }
+                    }
+                    .disabled(isLoggingIn)
+                    .frame(width: 150, height: 50)
+                    .background(Color(red: 0.25, green: 0.59, blue: 0.22))
+                    .foregroundColor(.white)
+                    .clipShape(Capsule())
+                    Text("Please log in or register with a Device Sync user account. This is separate from your Atlas Cloud login")
+                        .font(.footnote)
+                        .padding(20)
+                        .multilineTextAlignment(.center)
+                }.padding(20)
+            }
         }
     }
 
